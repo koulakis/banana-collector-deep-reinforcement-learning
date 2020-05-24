@@ -1,5 +1,5 @@
 # Banana collector
----
+
 ## Introduction
 This is a solution for the first project of the (Udacity deep reinforcement learning course)[https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893]. It includes code for training an agent and for using it in a simulation environment.
 
