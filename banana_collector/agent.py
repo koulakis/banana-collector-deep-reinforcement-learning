@@ -7,7 +7,6 @@ import numpy as np
 
 class Agent(ABC):
     """Base class for agents with one dimensional state & action inputs."""
-
     def __init__(self, state_size: int, action_size: int, seed: Optional[int] = None):
         """Initialize an Agent object.
 
