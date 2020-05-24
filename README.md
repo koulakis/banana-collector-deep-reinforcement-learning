@@ -17,7 +17,7 @@ The agent is placed in a room with bananas and its goal is to collect as many fr
   - 2: left
   - 3: right
 - Goal:
-  - Get an average score $\geq 13$ over 100 consecutive episodes
+  - Get an average score of at least 13 over 100 consecutive episodes
 
 ## Solution
 ### Reinforcement learning algorithm
