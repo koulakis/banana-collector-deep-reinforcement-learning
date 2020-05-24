@@ -1,13 +1,15 @@
 from time import sleep
 from enum import Enum
+import logging
 
 from unityagents import UnityEnvironment
 import typer
 
 from scripts.definitions import ROOT_DIR
-from banana_collector.agent import RandomAgent
+from banana_collector.agent import RandomAgent, DqnAgent
 
 DEFAULT_ENVIRONMENT_EXECUTABLE_PATH = str(ROOT_DIR / 'unity_banana_environment/Banana.x86_64')
+DEVICE = 'cpu'
 
 
 class AgentType(str, Enum):
@@ -29,8 +31,12 @@ def run_environment(
 
     if agent_type is AgentType.random:
         agent = RandomAgent(state_size, action_size)
+        logging.info(f'Loaded {agent} agent.')
+        print(f'Loaded {agent} agent.')
     else:
-        raise NotImplementedError
+        agent = DqnAgent(state_size=state_size, action_size=action_size, device=DEVICE)
+        logging.info(f'Loaded {agent} agent.')
+        print(f'Loaded {agent} agent.')
 
     env_info = env.reset(train_mode=False)[brain_name]
     state = env_info.vector_observations[0]
