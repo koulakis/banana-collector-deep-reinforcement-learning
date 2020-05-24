@@ -21,7 +21,8 @@ setuptools.setup(
     install_requires=[
         'tensorflow==1.7.1',
         'mlagents',
-        'numpy'
+        'numpy',
+        'typer'
     ],
     cmdclass={
         'install': InstallUdacityCustomUnityAgents

@@ -1,2 +1,5 @@
 .idea
 unity_banana_environment
+*.egg-info
+__pycache__
+unity-environment.log
