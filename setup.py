@@ -1,14 +1,19 @@
 import setuptools
 from setuptools.command.install import install
-from subprocess import check_call
+import subprocess
 
 UNITY_AGENTS_PATH = 'udacity_custom_unity_agents/'
+PYTORCH_CUDA_10_1_COMPATIBLE_INSTALLATION = \
+    'pip install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html'
 
 
 class InstallUdacityCustomUnityAgents(install):
     """Install the agents defined by udacity before setting up the package."""
     def run(self):
-        check_call(f'pip install {UNITY_AGENTS_PATH}'.split(' '))
+        subprocess.run(
+            f'pip install {UNITY_AGENTS_PATH}'.split(' ')
+            + ['&&']
+            + PYTORCH_CUDA_10_1_COMPATIBLE_INSTALLATION.split(' '))
         install.run(self)
 
 

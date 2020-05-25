@@ -4,12 +4,13 @@ import logging
 
 from unityagents import UnityEnvironment
 import typer
+import torch
 
 from scripts.definitions import ROOT_DIR
 from banana_collector.agent import RandomAgent, DqnAgent
 
 DEFAULT_ENVIRONMENT_EXECUTABLE_PATH = str(ROOT_DIR / 'unity_banana_environment/Banana.x86_64')
-DEVICE = 'cpu'
+DEVICE = torch.device('cpu')
 
 
 class AgentType(str, Enum):
@@ -21,6 +22,12 @@ def run_environment(
         environment_path: str = DEFAULT_ENVIRONMENT_EXECUTABLE_PATH,
         agent_type: AgentType = AgentType.dqn
 ):
+    """Run the banana environment and visualize the actions an agent.
+
+    Args:
+        environment_path: path of the executable which runs the banana environment
+        agent_type: the type of the agent. Can either be a dummy rangdom agent or an agent using a DQN
+    """
     env = UnityEnvironment(file_name=environment_path)
     brain_name = env.brain_names[0]
     brain = env.brains[brain_name]

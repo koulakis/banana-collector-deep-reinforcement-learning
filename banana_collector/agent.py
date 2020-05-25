@@ -6,7 +6,8 @@ import numpy as np
 import torch
 from torch import optim
 
-from banana_collector.network import FullyConnected
+from banana_collector.network import FullyConnectedNetwork
+from banana_collector.replay_buffer import ReplayBuffer
 
 DEFAULT_DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -52,16 +53,24 @@ class DqnAgent(Agent):
             state_size: int,
             action_size: int,
             learning_rate: float = 1e-4,
-            device: str = DEFAULT_DEVICE,
+            device: torch.device = DEFAULT_DEVICE,
+            buffer_size=int(1e5),
+            batch_size=64,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
         self.device = device
 
-        self.local_dqn = FullyConnected(state_size=state_size, action_size=action_size).to(device)
-        self.target_dqn = FullyConnected(state_size=state_size, action_size=action_size).to(device)
+        self.local_dqn = FullyConnectedNetwork(state_size=state_size, action_size=action_size).to(device)
+        self.target_dqn = FullyConnectedNetwork(state_size=state_size, action_size=action_size).to(device)
 
         self.optimizer = optim.Adam(self.local_dqn.parameters(), lr=learning_rate)
+        self.memory = ReplayBuffer(
+            action_size=action_size,
+            buffer_size=buffer_size,
+            batch_size=batch_size,
+            seed=seed,
+            device=device)
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
         """Gather experience for a single step. The information is saved on a replay buffer and training is
