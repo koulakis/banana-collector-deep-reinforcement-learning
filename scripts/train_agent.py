@@ -24,7 +24,8 @@ def train(
     initial_epsilon: float = 1.0,
     final_epsilon: float = 0.01,
     epsilon_decay: float = 0.995,
-    hidden_layers: Optional[str] = None
+    hidden_layers: Optional[str] = None,
+    double_dqn: bool = True
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)
@@ -44,7 +45,12 @@ def train(
 
     if hidden_layers:
         hidden_layers = list(map(int, hidden_layers.split(',')))
-    agent = DqnAgent(state_size=state_size, action_size=action_size, device=device, hidden_layers=hidden_layers)
+    agent = DqnAgent(
+        state_size=state_size,
+        action_size=action_size,
+        device=device,
+        hidden_layers=hidden_layers,
+        double_dqn=double_dqn)
 
     scores = train_agent(
         agent,

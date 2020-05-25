@@ -77,6 +77,7 @@ class DqnAgent(Agent):
             gamma: float = 0.99,
             tau: float = 1e-3,
             hidden_layers: Optional[List[int]] = None,
+            double_dqn: bool = True,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
@@ -105,6 +106,7 @@ class DqnAgent(Agent):
         self.batch_size = batch_size
         self.gamma = gamma
         self.tau = tau
+        self.double_dqn = double_dqn
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
         """Gather experience for a single step. The information is saved on a replay buffer and training is
@@ -147,9 +149,13 @@ class DqnAgent(Agent):
         """
         states, actions, rewards, next_states, dones = experiences
 
+        argmax_dqn = self.local_dqn if self.double_dqn else self.target_dqn
+        argmax_dqn.eval()
         self.target_dqn.eval()
         with torch.no_grad():
-            target_max_values = self.target_dqn(next_states).max(dim=1, keepdim=True).values.detach()
+            argmax_values = argmax_dqn(next_states).argmax(dim=1, keepdim=True)
+            target_max_values = self.target_dqn(next_states).gather(1, argmax_values).detach()
+        argmax_dqn.train()
         self.target_dqn.train()
 
         expected_rewards = rewards + (1.0 - dones) * self.gamma * target_max_values
