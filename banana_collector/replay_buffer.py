@@ -19,7 +19,6 @@ class ReplayBuffer:
             device: the device to which samples are loaded
             seed: random seed
         """
-        print('Using new replay buffer.')
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)
         self.batch_size = batch_size

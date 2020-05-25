@@ -1,6 +1,7 @@
 import random
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -33,7 +34,15 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def act(self, state: np.ndarray) -> int:
+    def act(self, state: np.ndarray, epsilon: float = 0.0) -> int:
+        pass
+
+    @abstractmethod
+    def save(self, output_path: Path):
+        pass
+
+    @abstractmethod
+    def load(self, input_path: Path):
         pass
 
 
@@ -43,9 +52,15 @@ class RandomAgent(Agent):
         """No training for the random agent."""
         pass
 
-    def act(self, state: np.ndarray) -> int:
+    def act(self, state: np.ndarray, epsilon: float = 0.0) -> int:
         """Randomly select and return an action."""
         return random.randint(0, self.action_size)
+
+    def save(self, output_path: Path):
+        pass
+
+    def load(self, input_path: Path):
+        pass
 
 
 class DqnAgent(Agent):
@@ -106,6 +121,14 @@ class DqnAgent(Agent):
             return int(np.argmax(action_values.cpu().data.numpy()))
         else:
             return random.choice(np.arange(self.action_size))
+
+    def save(self, output_path: Path):
+        """Save the weights of the local network."""
+        torch.save(self.local_dqn.state_dict(), output_path)
+
+    def load(self, input_path: Path):
+        """Load the weights of the local network."""
+        self.local_dqn.load_state_dict(torch.load(input_path))
 
     def learn(self, experiences: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]):
         """Update value parameters using given batch of experience tuples.

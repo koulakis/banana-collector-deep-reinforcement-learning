@@ -1,6 +1,8 @@
 from time import sleep
 from enum import Enum
 import logging
+from typing import Optional
+from pathlib import Path
 
 from unityagents import UnityEnvironment
 import typer
@@ -20,13 +22,15 @@ class AgentType(str, Enum):
 
 def run_environment(
         environment_path: str = DEFAULT_ENVIRONMENT_EXECUTABLE_PATH,
-        agent_type: AgentType = AgentType.dqn
+        agent_type: AgentType = AgentType.dqn,
+        agent_parameters_path: Optional[Path] = None
 ):
     """Run the banana environment and visualize the actions an agent.
 
     Args:
         environment_path: path of the executable which runs the banana environment
         agent_type: the type of the agent. Can either be a dummy rangdom agent or an agent using a DQN
+        agent_parameters_path: an optional path to load the agent parameters from
     """
     env = UnityEnvironment(file_name=environment_path)
     brain_name = env.brain_names[0]
@@ -39,11 +43,11 @@ def run_environment(
     if agent_type is AgentType.random:
         agent = RandomAgent(state_size, action_size)
         logging.info(f'Loaded {agent} agent.')
-        print(f'Loaded {agent} agent.')
     else:
         agent = DqnAgent(state_size=state_size, action_size=action_size, device=DEVICE)
+        if agent_parameters_path:
+            agent.load(agent_parameters_path)
         logging.info(f'Loaded {agent} agent.')
-        print(f'Loaded {agent} agent.')
 
     env_info = env.reset(train_mode=False)[brain_name]
     state = env_info.vector_observations[0]

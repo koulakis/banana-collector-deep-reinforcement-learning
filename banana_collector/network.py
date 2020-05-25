@@ -19,4 +19,4 @@ class FullyConnectedNetwork(nn.Module):
         for fc in self.fc_layers:
             net = F.relu(fc(net))
 
-        return F.softmax(self.output_layer(net))
+        return self.output_layer(net)
