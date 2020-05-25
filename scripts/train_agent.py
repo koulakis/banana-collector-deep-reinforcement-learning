@@ -1,3 +1,5 @@
+from typing import Optional
+
 import typer
 import torch
 from unityagents import UnityEnvironment
@@ -21,7 +23,8 @@ def train(
     maximum_timestaps: int = 1000,
     initial_epsilon: float = 1.0,
     final_epsilon: float = 0.01,
-    epsilon_decay: float = 0.995
+    epsilon_decay: float = 0.995,
+    hidden_layers: Optional[str] = None
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)
@@ -39,7 +42,9 @@ def train(
     env_info = env.reset(train_mode=True)[brain_name]
     state_size = len(env_info.vector_observations[0])
 
-    agent = DqnAgent(state_size=state_size, action_size=action_size, device=device)
+    if hidden_layers:
+        hidden_layers = list(map(int, hidden_layers.split(',')))
+    agent = DqnAgent(state_size=state_size, action_size=action_size, device=device, hidden_layers=hidden_layers)
 
     scores = train_agent(
         agent,
@@ -56,7 +61,7 @@ def train(
     (pd.DataFrame({'score': scores})
      .reset_index()
      .rename(columns={'index': 'episode'})
-     .to_csv(score_path))
+     .to_csv(score_path, index=False))
 
     plt.plot(range(len(scores)), scores)
     plt.ylabel('Score')

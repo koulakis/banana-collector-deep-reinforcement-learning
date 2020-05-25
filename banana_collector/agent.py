@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from pathlib import Path
 
 import numpy as np
@@ -76,13 +76,22 @@ class DqnAgent(Agent):
             update_every_global_step: int = 4,
             gamma: float = 0.99,
             tau: float = 1e-3,
+            hidden_layers: Optional[List[int]] = None,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
         self.device = device
 
-        self.local_dqn = FullyConnectedNetwork(state_size=state_size, action_size=action_size).to(device)
-        self.target_dqn = FullyConnectedNetwork(state_size=state_size, action_size=action_size).to(device)
+        self.local_dqn = FullyConnectedNetwork(
+            state_size=state_size,
+            action_size=action_size,
+            hidden_layer_widths=hidden_layers).to(device)
+        self.target_dqn = FullyConnectedNetwork(
+            state_size=state_size,
+            action_size=action_size,
+            hidden_layer_widths=hidden_layers).to(device)
+
+        print(self.local_dqn)
 
         self.optimizer = optim.Adam(self.local_dqn.parameters(), lr=learning_rate)
         self.memory = ReplayBuffer(

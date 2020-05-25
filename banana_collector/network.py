@@ -10,7 +10,7 @@ class FullyConnectedNetwork(nn.Module):
         """The network is initialized with a list of hidden layer sizes."""
         super().__init__()
         if hidden_layer_widths is None:
-            hidden_layer_widths = [128, 64, 64]
+            hidden_layer_widths = [64, 64, 64]
 
         input_layer_output_size = hidden_layer_widths[0] if any(hidden_layer_widths) else action_size
         output_layer_input_size = hidden_layer_widths[-1] if any(hidden_layer_widths) else state_size
