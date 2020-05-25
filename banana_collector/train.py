@@ -17,7 +17,8 @@ def train_agent(
         maximum_timestaps: int = 1000,
         initial_epsilon: float = 1.0,
         final_epsilon: float = 0.01,
-        epsilon_decay: float = 0.995
+        epsilon_decay: float = 0.995,
+        solution_threshold: float = 13
 ) -> List[float]:
     """Train and save an agent using an environment.
 
@@ -31,11 +32,14 @@ def train_agent(
         initial_epsilon: starting value of epsilon, for epsilon-greedy action selection
         final_epsilon: minimum value of epsilon
         epsilon_decay: multiplicative factor (per episode) for decreasing epsilon
+        solution_threshold: if this threshold is exceeded from the average of 100 consecutive episodes, then the
+            environment is considered solved
 
     Returns:
         a list of the rolling 100 episode score averages
     """
     scores = []
+    solved = False
     scores_window = deque(maxlen=100)
     epsilon = initial_epsilon
 
@@ -59,9 +63,13 @@ def train_agent(
         scores_window.append(score)
         scores.append(score)
         epsilon = max(final_epsilon, epsilon_decay * epsilon)
-        print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end='')
+        print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}', end='')
         if i_episode % 100 == 0:
-            print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
+            print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}')
+
+        if np.mean(scores_window) >= solution_threshold and not solved:
+            print(f'\nEnvironment solved in {i_episode - 100:d} episodes!\tAverage Score: {np.mean(scores_window):.2f}')
+            solved = True
 
     agent.save(agent_save_path)
     return scores

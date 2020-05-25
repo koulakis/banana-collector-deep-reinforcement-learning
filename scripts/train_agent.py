@@ -2,6 +2,7 @@ import typer
 import torch
 from unityagents import UnityEnvironment
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from scripts.definitions import ROOT_DIR
 from banana_collector.agent import DqnAgent
@@ -13,7 +14,7 @@ EXPERIMENTS_DIR = ROOT_DIR / 'experiments'
 
 
 def train(
-    experiment_name: str = 'dqn_training',
+    experiment_name: str = 'dqn',
     device: str = DEVICE,
     environment_path: str = ENVIRONMENT_EXECUTABLE_PATH,
     number_of_episodes: int = 2000,
@@ -28,6 +29,7 @@ def train(
     experiment_dir.mkdir(exist_ok=True)
     agent_path = experiment_dir / 'checkpoint.pth'
     performance_path = experiment_dir / 'performance.png'
+    score_path = experiment_dir / 'scores.csv'
 
     env = UnityEnvironment(file_name=environment_path, no_graphics=True)
     brain_name = env.brain_names[0]
@@ -50,6 +52,11 @@ def train(
         final_epsilon=final_epsilon,
         epsilon_decay=epsilon_decay
     )
+
+    (pd.DataFrame({'score': scores})
+     .reset_index()
+     .rename(columns={'index': 'episode'})
+     .to_csv(score_path))
 
     plt.plot(range(len(scores)), scores)
     plt.ylabel('Score')
