@@ -1,10 +1,12 @@
 import random
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
 from torch import optim
+import torch.nn.functional as F
+from torch import nn
 
 from banana_collector.network import FullyConnectedNetwork
 from banana_collector.replay_buffer import ReplayBuffer
@@ -54,8 +56,11 @@ class DqnAgent(Agent):
             action_size: int,
             learning_rate: float = 1e-4,
             device: torch.device = DEFAULT_DEVICE,
-            buffer_size=int(1e5),
-            batch_size=64,
+            buffer_size: int = int(1e5),
+            batch_size: int = 64,
+            update_every_global_step: int = 4,
+            gamma: float = 0.99,
+            tau: float = 1e-3,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
@@ -71,11 +76,22 @@ class DqnAgent(Agent):
             batch_size=batch_size,
             seed=seed,
             device=device)
+        self.global_step = 0
+        self.update_every_global_step = update_every_global_step
+        self.batch_size = batch_size
+        self.gamma = gamma
+        self.tau = tau
 
     def step(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
         """Gather experience for a single step. The information is saved on a replay buffer and training is
         triggered with a fixed frequency."""
-        pass
+        self.memory.add(state, action, reward, next_state, done)
+
+        self.global_step += 1
+        if self.global_step % self.update_every_global_step == 0:
+            if len(self.memory) > self.batch_size:
+                experiences = self.memory.sample()
+                self.learn(experiences)
 
     def act(self, state: np.ndarray, epsilon: float = 0.0) -> int:
         """For a given input state compute the value of the Q-function using on the local network. A parameter
@@ -90,3 +106,40 @@ class DqnAgent(Agent):
             return int(np.argmax(action_values.cpu().data.numpy()))
         else:
             return random.choice(np.arange(self.action_size))
+
+    def learn(self, experiences: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]):
+        """Update value parameters using given batch of experience tuples.
+
+        Args:
+            experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples
+        """
+        states, actions, rewards, next_states, dones = experiences
+
+        self.target_dqn.eval()
+        with torch.no_grad():
+            target_max_values = self.target_dqn(next_states).max(dim=1, keepdim=True).values.detach()
+        self.target_dqn.train()
+
+        expected_rewards = rewards + (1.0 - dones) * self.gamma * target_max_values
+        predicted_rewards = self.local_dqn(states).gather(1, actions)
+
+        loss = F.mse_loss(expected_rewards, predicted_rewards)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        self.soft_update(self.local_dqn, self.target_dqn, self.tau)
+
+    @staticmethod
+    def soft_update(local_model: nn.Module, target_model: nn.Module, tau: float):
+        """Update the target model parameters with a fraction of the local model parameters regulated by tau:
+        θ_target = τ*θ_local + (1 - τ)*θ_target.
+
+        Args:
+            local_model: weights will be copied from
+            target_model: weights will be copied to
+            tau: interpolation parameter
+        """
+        for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
+            target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)
