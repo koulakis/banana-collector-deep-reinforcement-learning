@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from collections import deque
 
 import pytest
 import torch
@@ -61,9 +62,21 @@ def dummy_prioritize_replay_buffer_with_made_up_queue_samples(
 
 @pytest.fixture(scope='class')
 def dummy_real_size_prioritized_replay_buffer():
-    return PrioritizedReplayBuffer(
+    buffer = PrioritizedReplayBuffer(
         action_size=4,
         buffer_size=int(1e5),
         batch_size=64,
         seed=None,
         device=torch.device('cpu'))
+
+    buffer.memory.extend(zip(
+        range(int(1e5)),
+        [dict(
+            state=np.array([i]),
+            action=0,
+            reward=0.0,
+            next_state=np.array([]),
+            done=False)
+            for i in range(int(1e5))]))
+
+    return buffer

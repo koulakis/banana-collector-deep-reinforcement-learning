@@ -34,7 +34,9 @@ setuptools.setup(
     },
     extras_require={
         'dev': [
-            'jupyterlab'
+            'jupyterlab',
+            'pytest-timeout',
+            'pytest-benchmark'
         ]
     },
     python_requires='~=3.6'
