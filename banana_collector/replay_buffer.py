@@ -134,7 +134,7 @@ class PrioritizedReplayBuffer:
 
         self.sample_number += 1
 
-        return states, actions, rewards, next_states, dones, weights, experiences_idx.detach().numpy()
+        return states, actions, rewards, next_states, dones, weights, experiences_idx.detach().cpu().numpy()
 
     def update_priorities(self, experiences_idx: List[int], priorities: List[float]):
         """Update the priorities of the elements of the queue belonging to a batch."""

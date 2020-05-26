@@ -168,7 +168,7 @@ class DqnAgent(Agent):
             td_error = expected_rewards - predicted_rewards
             loss = (weights * td_error ** 2).mean()
 
-            self.memory.update_priorities(experiences_idx, np.abs(td_error.detach().numpy()))
+            self.memory.update_priorities(experiences_idx, np.abs(td_error.detach().cpu().numpy()))
 
         else:
             loss = F.mse_loss(expected_rewards, predicted_rewards)
