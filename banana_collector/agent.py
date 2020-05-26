@@ -165,10 +165,10 @@ class DqnAgent(Agent):
 
         if self.prioritize_replay:
             weights, experiences_idx = experiences[5:7]
-            self.memory.update_priorities(experiences_idx, np.abs(expected_rewards.numpy()))
-            predicted_rewards = torch.from_numpy(weights) * predicted_rewards
+            td_error = expected_rewards - predicted_rewards
+            loss = (weights * td_error ** 2).mean()
 
-            loss = (torch.from_numpy(weights) * (expected_rewards - predicted_rewards) ** 2).mean()
+            self.memory.update_priorities(experiences_idx, np.abs(td_error.detach().numpy()))
 
         else:
             loss = F.mse_loss(expected_rewards, predicted_rewards)

@@ -1,6 +1,6 @@
 import random
 from collections import deque
-from typing import Deque, Any, Dict, List, Optional
+from typing import Deque, Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -108,9 +108,15 @@ class PrioritizedReplayBuffer:
         maximum_priority = max(map(lambda t: t[0], self.memory)) if any(self.memory) else 1.0
         self.memory.append((maximum_priority, experience))
 
-    def sample(self):
+    def sample(self) -> Tuple[
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            List[int]]:
         """Randomly sample a batch of experiences from memory."""
-        self.sample_number += 1
         priorities = np.array([t[0] for t in self.memory]) ** self.alpha
         probabilities = priorities / priorities.sum()
 
@@ -125,13 +131,16 @@ class PrioritizedReplayBuffer:
 
         weights = (len(self.memory) * probabilities[experiences_idx]) ** -self._annealed_beta()
         weights /= weights.max()
+        weights = torch.from_numpy(weights).to(self.device)
+
+        self.sample_number += 1
 
         return states, actions, rewards, next_states, dones, weights, experiences_idx
 
     def update_priorities(self, experiences_idx: List[int], priorities: List[float]):
         """Update the priorities of the elements of the queue belonging to a batch."""
         for idx, priority in zip(experiences_idx, priorities):
-            self.memory[idx] = (float(priority), self.memory[idx][1])
+            self.memory[idx] = (abs(float(priority)), self.memory[idx][1])
 
     def _gather_attributes_to_tensor(
             self,
