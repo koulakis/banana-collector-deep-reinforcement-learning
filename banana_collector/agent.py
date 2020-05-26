@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from banana_collector.network import FullyConnectedNetwork
-from banana_collector.replay_buffer import ReplayBuffer
+from banana_collector.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 DEFAULT_DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -78,10 +78,12 @@ class DqnAgent(Agent):
             tau: float = 1e-3,
             hidden_layers: Optional[List[int]] = None,
             double_dqn: bool = True,
+            prioritize_replay: bool = True,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
         self.device = device
+        self.prioritize_replay = prioritize_replay
 
         self.local_dqn = FullyConnectedNetwork(
             state_size=state_size,
@@ -95,7 +97,7 @@ class DqnAgent(Agent):
         print(self.local_dqn)
 
         self.optimizer = optim.Adam(self.local_dqn.parameters(), lr=learning_rate)
-        self.memory = ReplayBuffer(
+        self.memory = (PrioritizedReplayBuffer if self.prioritize_replay else ReplayBuffer)(
             action_size=action_size,
             buffer_size=buffer_size,
             batch_size=batch_size,
@@ -141,13 +143,13 @@ class DqnAgent(Agent):
         """Load the weights of the local network."""
         self.local_dqn.load_state_dict(torch.load(input_path))
 
-    def learn(self, experiences: Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]):
+    def learn(self, experiences: List[torch.Tensor]):
         """Update value parameters using given batch of experience tuples.
 
         Args:
             experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples
         """
-        states, actions, rewards, next_states, dones = experiences
+        states, actions, rewards, next_states, dones = experiences[:5]
 
         argmax_dqn = self.local_dqn if self.double_dqn else self.target_dqn
         argmax_dqn.eval()
@@ -161,7 +163,15 @@ class DqnAgent(Agent):
         expected_rewards = rewards + (1.0 - dones) * self.gamma * target_max_values
         predicted_rewards = self.local_dqn(states).gather(1, actions)
 
-        loss = F.mse_loss(expected_rewards, predicted_rewards)
+        if self.prioritize_replay:
+            weights, experiences_idx = experiences[5:7]
+            td_error = expected_rewards - predicted_rewards
+            loss = (weights * td_error ** 2).mean()
+
+            self.memory.update_priorities(experiences_idx, np.abs(td_error.detach().numpy()))
+
+        else:
+            loss = F.mse_loss(expected_rewards, predicted_rewards)
 
         self.optimizer.zero_grad()
         loss.backward()
