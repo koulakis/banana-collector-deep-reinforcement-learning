@@ -117,10 +117,10 @@ class PrioritizedReplayBuffer:
             torch.Tensor,
             List[int]]:
         """Randomly sample a batch of experiences from memory."""
-        priorities = np.array([t[0] for t in self.memory]) ** self.alpha
+        priorities = torch.FloatTensor([t[0] for t in self.memory]).to(self.device) ** self.alpha
         probabilities = priorities / priorities.sum()
 
-        experiences_idx = np.random.choice(range(len(self.memory)), self.batch_size, p=probabilities)
+        experiences_idx = torch.multinomial(probabilities, self.batch_size, replacement=True)
         experiences = [self.memory[idx][1] for idx in experiences_idx]
 
         states = self._gather_attributes_to_tensor(experiences, 'state')
@@ -131,11 +131,10 @@ class PrioritizedReplayBuffer:
 
         weights = (len(self.memory) * probabilities[experiences_idx]) ** -self._annealed_beta()
         weights /= weights.max()
-        weights = torch.from_numpy(weights).to(self.device)
 
         self.sample_number += 1
 
-        return states, actions, rewards, next_states, dones, weights, experiences_idx
+        return states, actions, rewards, next_states, dones, weights, experiences_idx.detach().numpy()
 
     def update_priorities(self, experiences_idx: List[int], priorities: List[float]):
         """Update the priorities of the elements of the queue belonging to a batch."""

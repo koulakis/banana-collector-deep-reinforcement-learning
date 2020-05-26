@@ -80,7 +80,6 @@ def test_prioritized_replay_buffer_updates_priorities(
 
 
 class TestPrioritizedReplayBufferPerformance:
-    @pytest.mark.timeout(1)
     def test_buffering_frames_is_fast(self, dummy_real_size_prioritized_replay_buffer, benchmark):
         def add_to_buffer():
             dummy_real_size_prioritized_replay_buffer.add(np.array([1, 2, 3]), 0, 0.0, np.array([1, 2, 3]), False)
@@ -89,7 +88,6 @@ class TestPrioritizedReplayBufferPerformance:
         benchmark.pedantic(add_to_buffer, iterations=iterations)
         assert len(dummy_real_size_prioritized_replay_buffer) == int(1e5)
 
-    @pytest.mark.timeout(1)
     def test_sampling_is_almost_constant(self, dummy_real_size_prioritized_replay_buffer, benchmark):
         def sample_from_buffer():
             nr_samples = 100
@@ -98,14 +96,13 @@ class TestPrioritizedReplayBufferPerformance:
                 for _ in range(nr_samples)])
             return sample_states
 
-        iterations = 3
+        iterations = 1
         samples = benchmark.pedantic(sample_from_buffer, iterations=iterations)
 
         assert len(samples) == 64 * 100
 
 
 class TestReplayBufferPerformance:
-    @pytest.mark.timeout(1)
     def test_sampling_is_almost_constant(self, dummy_real_size_replay_buffer, benchmark):
         def sample_from_buffer():
             nr_samples = 100

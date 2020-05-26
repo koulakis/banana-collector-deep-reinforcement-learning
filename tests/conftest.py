@@ -69,7 +69,7 @@ def dummy_real_size_prioritized_replay_buffer():
         device=torch.device('cpu'))
 
     buffer.memory.extend(zip(
-        range(int(1e5)),
+        np.random.rand(int(1e5)),
         [dict(
             state=np.array([i]),
             action=0,
