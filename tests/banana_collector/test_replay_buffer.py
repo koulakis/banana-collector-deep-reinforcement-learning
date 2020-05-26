@@ -102,3 +102,19 @@ class TestPrioritizedReplayBufferPerformance:
         samples = benchmark.pedantic(sample_from_buffer, iterations=iterations)
 
         assert len(samples) == 64 * 100
+
+
+class TestReplayBufferPerformance:
+    @pytest.mark.timeout(1)
+    def test_sampling_is_almost_constant(self, dummy_real_size_replay_buffer, benchmark):
+        def sample_from_buffer():
+            nr_samples = 100
+            sample_states = np.concatenate([
+                dummy_real_size_replay_buffer.sample()[0].flatten().detach().numpy()
+                for _ in range(nr_samples)])
+            return sample_states
+
+        iterations = 5
+        samples = benchmark.pedantic(sample_from_buffer, iterations=iterations)
+
+        assert len(samples) == 64 * 100

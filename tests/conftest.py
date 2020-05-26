@@ -1,11 +1,10 @@
 from typing import List, Tuple
-from collections import deque
 
 import pytest
 import torch
 import numpy as np
 
-from banana_collector.replay_buffer import PrioritizedReplayBuffer
+from banana_collector.replay_buffer import PrioritizedReplayBuffer, ReplayBuffer
 
 
 def _generate_prioritized_replay_buffer() -> PrioritizedReplayBuffer:
@@ -78,5 +77,25 @@ def dummy_real_size_prioritized_replay_buffer():
             next_state=np.array([]),
             done=False)
             for i in range(int(1e5))]))
+
+    return buffer
+
+
+@pytest.fixture(scope='class')
+def dummy_real_size_replay_buffer():
+    buffer = ReplayBuffer(
+        action_size=4,
+        buffer_size=int(1e5),
+        batch_size=64,
+        seed=None,
+        device=torch.device('cpu'))
+
+    buffer.memory.extend([dict(
+            state=np.array([i]),
+            action=0,
+            reward=0.0,
+            next_state=np.array([]),
+            done=False)
+            for i in range(int(1e5))])
 
     return buffer
