@@ -1,6 +1,6 @@
 import random
 from collections import deque
-from typing import Deque, Any, Dict, List
+from typing import Deque, Any, Dict, List, Optional
 
 import numpy as np
 import torch
@@ -9,7 +9,13 @@ import torch
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
-    def __init__(self, action_size: int, buffer_size: int, batch_size: int, seed: int, device: torch.device):
+    def __init__(
+            self,
+            action_size: int,
+            buffer_size: int,
+            batch_size: int,
+            seed: Optional[int],
+            device: torch.device):
         """Initialize a ReplayBuffer object.
 
         Args:
@@ -67,7 +73,7 @@ class PrioritizedReplayBuffer:
             action_size: int,
             buffer_size: int,
             batch_size: int,
-            seed: int,
+            seed: Optional[int],
             device: torch.device,
             alpha: float = 0.6,
             beta_0: float = 0.4,
