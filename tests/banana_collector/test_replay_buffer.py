@@ -68,12 +68,15 @@ class TestSampling:
         np.testing.assert_almost_equal(sample_weights_annealed, expected_weights_annealed, decimal=2)
 
 
-def test_prioritized_replay_buffer_updates_priorities(dummy_prioritized_replay_buffer_with_made_up_queue):
-    pass
+def test_prioritized_replay_buffer_updates_priorities(
+        dummy_priorities, dummy_prioritized_replay_buffer_with_made_up_queue):
+    idxs = [0, 3, 1, 0]
+    priorities = [0.3, 2.1, -1.3, 0.8]
 
+    dummy_prioritized_replay_buffer_with_made_up_queue.update_priorities(idxs, priorities)
 
-def test_converges_to_enforced_distribution(dummy_prioritized_replay_buffer):
-    pass
+    buffer_priorities = [dummy_prioritized_replay_buffer_with_made_up_queue.memory[i][0] for i in range(5)]
+    assert buffer_priorities == [0.8, 1.3, dummy_priorities[2], 2.1, dummy_priorities[4]]
 
 
 class TestPrioritizedReplayBufferPerformance:
