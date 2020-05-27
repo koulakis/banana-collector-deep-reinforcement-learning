@@ -102,13 +102,13 @@ class PrioritizedReplayBuffer:
         self.seed = random.seed(seed)
         self.sample_number = 0
         self.epsilon = epsilon
+        self.max_priorities = deque(maxlen=buffer_size // 64)
+        self.max_priorities.append(1.0)
 
     def add(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
         """Add a new experience to memory with maximum priority."""
         experience = dict(state=state, action=action, reward=reward, next_state=next_state, done=done)
-
-        maximum_priority = max(map(lambda t: t[0], self.memory)) if any(self.memory) else 1.0
-        self.memory.append((maximum_priority, experience))
+        self.memory.append((max(self.max_priorities), experience))
 
     def sample(self) -> Tuple[
             torch.Tensor,
@@ -140,8 +140,11 @@ class PrioritizedReplayBuffer:
 
     def update_priorities(self, experiences_idx: List[int], priorities: List[float]):
         """Update the priorities of the elements of the queue belonging to a batch."""
-        for idx, priority in zip(experiences_idx, priorities):
-            self.memory[idx] = (abs(float(priority)) + self.epsilon, self.memory[idx][1])
+        abs_pos_priorities = [abs(float(p)) + self.epsilon for p in priorities]
+        for idx, priority in zip(experiences_idx, abs_pos_priorities):
+            self.memory[idx] = (priority, self.memory[idx][1])
+
+        self.max_priorities.append(max(abs_pos_priorities))
 
     def _gather_attributes_to_tensor(
             self,

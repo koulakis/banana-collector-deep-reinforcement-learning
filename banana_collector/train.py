@@ -64,6 +64,7 @@ def train_agent(
         scores.append(score)
         epsilon = max(final_epsilon, epsilon_decay * epsilon)
         print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}', end='')
+
         if i_episode % 100 == 0:
             print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}')
 
