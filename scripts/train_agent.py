@@ -25,7 +25,8 @@ def train(
     final_epsilon: float = 0.01,
     epsilon_decay: float = 0.995,
     hidden_layers: Optional[str] = None,
-    double_dqn: bool = True
+    double_dqn: bool = True,
+    prioritize_replay: bool = True
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)
@@ -50,7 +51,8 @@ def train(
         action_size=action_size,
         device=device,
         hidden_layers=hidden_layers,
-        double_dqn=double_dqn)
+        double_dqn=double_dqn,
+        prioritize_replay=prioritize_replay)
 
     scores = train_agent(
         agent,

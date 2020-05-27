@@ -77,7 +77,8 @@ class PrioritizedReplayBuffer:
             device: torch.device,
             alpha: float = 0.6,
             beta_0: float = 0.4,
-            beta_number_annealing_steps=2000*75):
+            beta_number_annealing_steps=2000*75,
+            epsilon=1e-6):
         """Initialize a ReplayBuffer object.
 
             Args:
@@ -100,6 +101,7 @@ class PrioritizedReplayBuffer:
         self.device = device
         self.seed = random.seed(seed)
         self.sample_number = 0
+        self.epsilon = epsilon
 
     def add(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
         """Add a new experience to memory with maximum priority."""
@@ -117,7 +119,7 @@ class PrioritizedReplayBuffer:
             torch.Tensor,
             List[int]]:
         """Randomly sample a batch of experiences from memory."""
-        priorities = torch.FloatTensor([t[0] for t in self.memory]).to(self.device) ** self.alpha
+        priorities = (torch.FloatTensor([t[0] for t in self.memory]).to(self.device)) ** self.alpha
         probabilities = priorities / priorities.sum()
 
         experiences_idx = torch.multinomial(probabilities, self.batch_size, replacement=True)
@@ -139,7 +141,7 @@ class PrioritizedReplayBuffer:
     def update_priorities(self, experiences_idx: List[int], priorities: List[float]):
         """Update the priorities of the elements of the queue belonging to a batch."""
         for idx, priority in zip(experiences_idx, priorities):
-            self.memory[idx] = (abs(float(priority)), self.memory[idx][1])
+            self.memory[idx] = (abs(float(priority)) + self.epsilon, self.memory[idx][1])
 
     def _gather_attributes_to_tensor(
             self,

@@ -76,16 +76,21 @@ def test_prioritized_replay_buffer_updates_priorities(
     dummy_prioritized_replay_buffer_with_made_up_queue.update_priorities(idxs, priorities)
 
     buffer_priorities = [dummy_prioritized_replay_buffer_with_made_up_queue.memory[i][0] for i in range(5)]
-    assert buffer_priorities == [0.8, 1.3, dummy_priorities[2], 2.1, dummy_priorities[4]]
+    np.testing.assert_almost_equal(
+        buffer_priorities,
+        [0.8, 1.3, dummy_priorities[2], 2.1, dummy_priorities[4]],
+        decimal=6)
 
 
 class TestPrioritizedReplayBufferPerformance:
     def test_buffering_frames_is_fast(self, dummy_real_size_prioritized_replay_buffer, benchmark):
-        def add_to_buffer():
-            dummy_real_size_prioritized_replay_buffer.add(np.array([1, 2, 3]), 0, 0.0, np.array([1, 2, 3]), False)
+        nr_frames = 64
 
-        iterations = 100
-        benchmark.pedantic(add_to_buffer, iterations=iterations)
+        def add_to_buffer():
+            for _ in range(nr_frames):
+                dummy_real_size_prioritized_replay_buffer.add(np.array([1, 2, 3]), 0, 0.0, np.array([1, 2, 3]), False)
+
+        benchmark.pedantic(add_to_buffer, iterations=5)
         assert len(dummy_real_size_prioritized_replay_buffer) == int(1e5)
 
     def test_sampling_is_almost_constant(self, dummy_real_size_prioritized_replay_buffer, benchmark):
@@ -101,8 +106,38 @@ class TestPrioritizedReplayBufferPerformance:
 
         assert len(samples) == 64 * 100
 
+    def test_prioritized_replay_buffer_updates_priorities_fast(
+            self,
+            dummy_priorities,
+            dummy_real_size_prioritized_replay_buffer,
+            benchmark):
+        idxs = list(range(10000, 10064))
+        priorities = np.linspace(0.0, 1.0, 64)
+
+        def update_priorities():
+            for _ in range(100):
+                dummy_real_size_prioritized_replay_buffer.update_priorities(idxs, priorities)
+
+        benchmark.pedantic(update_priorities, iterations=5)
+
+        buffer_priorities = [dummy_real_size_prioritized_replay_buffer.memory[i][0] for i in idxs]
+        np.testing.assert_almost_equal(
+            buffer_priorities,
+            priorities,
+            decimal=6)
+
 
 class TestReplayBufferPerformance:
+    def test_buffering_frames_is_fast(self, dummy_real_size_replay_buffer, benchmark):
+        nr_frames = 64
+
+        def add_to_buffer():
+            for _ in range(nr_frames):
+                dummy_real_size_replay_buffer.add(np.array([1, 2, 3]), 0, 0.0, np.array([1, 2, 3]), False)
+
+        benchmark.pedantic(add_to_buffer, iterations=5)
+        assert len(dummy_real_size_replay_buffer) == int(1e5)
+
     def test_sampling_is_almost_constant(self, dummy_real_size_replay_buffer, benchmark):
         def sample_from_buffer():
             nr_samples = 100

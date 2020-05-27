@@ -59,7 +59,7 @@ def dummy_prioritize_replay_buffer_with_made_up_queue_samples(
     return [dummy_prioritized_replay_buffer_with_made_up_queue.sample() for _ in range(10000)]
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture
 def dummy_real_size_prioritized_replay_buffer():
     buffer = PrioritizedReplayBuffer(
         action_size=4,
@@ -81,7 +81,7 @@ def dummy_real_size_prioritized_replay_buffer():
     return buffer
 
 
-@pytest.fixture(scope='class')
+@pytest.fixture
 def dummy_real_size_replay_buffer():
     buffer = ReplayBuffer(
         action_size=4,
