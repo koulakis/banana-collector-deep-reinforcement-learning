@@ -75,7 +75,7 @@ def train_agent(
             print(f'\nEnvironment solved in {i_episode - 100:d} episodes!\tAverage Score: {np.mean(scores_window):.2f}')
             solved = True
 
-        if agent.prioritize_replay is not None:
+        if agent.prioritize_replay:
             per_betas.append(agent.memory._annealed_beta())
 
     agent.save(agent_save_path)

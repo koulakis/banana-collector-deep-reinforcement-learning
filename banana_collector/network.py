@@ -38,22 +38,21 @@ class DuelingNetwork(nn.Module):
             self,
             input_size: int,
             output_size: int,
-            backbone_hidden_layer_widths: Optional[List[int]] = None,
-            latent_size=64):
+            hidden_layer_widths: Optional[List[int]] = None):
         super().__init__()
-        if backbone_hidden_layer_widths is None:
-            backbone_hidden_layer_widths = [64, 64]
-        self.backbone = FullyConnectedNetwork(input_size, latent_size, backbone_hidden_layer_widths)
+        if hidden_layer_widths is None:
+            hidden_layer_widths = [64, 64, 64]
+
+        latent_size = hidden_layer_widths[-1]
+        self.backbone = FullyConnectedNetwork(input_size, latent_size, hidden_layer_widths)
         self.value = FullyConnectedNetwork(latent_size, 1, [latent_size // 2])
         self.advantage = FullyConnectedNetwork(latent_size, output_size, [latent_size // 2])
 
     def forward(self, state):
         latent = self.backbone(state)
-        value = self.value(state)
+        value = self.value(latent)
         advantage = self.advantage(latent)
 
-        print('Shape of advantage: ', advantage.shape)
-
-        zero_advantage = advantage - advantage.max(dim=(1, 2), keepdim=True)
+        zero_advantage = advantage - advantage.max(dim=1, keepdim=True)[0]
 
         return value + zero_advantage

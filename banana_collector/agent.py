@@ -9,7 +9,7 @@ from torch import optim
 import torch.nn.functional as F
 from torch import nn
 
-from banana_collector.network import FullyConnectedNetwork
+from banana_collector.network import FullyConnectedNetwork, DuelingNetwork
 from banana_collector.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 DEFAULT_DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -78,7 +78,8 @@ class DqnAgent(Agent):
             tau: float = 1e-3,
             hidden_layers: Optional[List[int]] = None,
             double_dqn: bool = True,
-            prioritize_replay: bool = True,
+            prioritize_replay: bool = False,
+            dueling_dqn: bool = True,
             per_alpha: Optional[float] = None,
             per_beta_0: Optional[float] = None,
             seed: Optional[int] = None):
@@ -87,11 +88,11 @@ class DqnAgent(Agent):
         self.device = device
         self.prioritize_replay = prioritize_replay
 
-        self.local_dqn = FullyConnectedNetwork(
+        self.local_dqn = (DuelingNetwork if dueling_dqn else FullyConnectedNetwork)(
             input_size=state_size,
             output_size=action_size,
             hidden_layer_widths=hidden_layers).to(device)
-        self.target_dqn = FullyConnectedNetwork(
+        self.target_dqn = (DuelingNetwork if dueling_dqn else FullyConnectedNetwork)(
             input_size=state_size,
             output_size=action_size,
             hidden_layer_widths=hidden_layers).to(device)
@@ -105,8 +106,11 @@ class DqnAgent(Agent):
             batch_size=batch_size,
             seed=seed,
             device=device,
-            alpha=per_alpha,
-            beta_0=per_beta_0)
+            **(dict(
+                alpha=per_alpha,
+                beta_0=per_beta_0)
+                if self.prioritize_replay
+               else dict()))
         self.global_step = 0
         self.update_every_global_step = update_every_global_step
         self.batch_size = batch_size

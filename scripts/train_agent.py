@@ -27,6 +27,7 @@ def train(
     hidden_layers: Optional[str] = None,
     double_dqn: bool = True,
     prioritize_replay: bool = False,
+    dueling_dqn: bool = True,
     per_alpha: Optional[float] = None,
     per_beta_0: Optional[float] = None
 ):
@@ -57,7 +58,8 @@ def train(
         double_dqn=double_dqn,
         prioritize_replay=prioritize_replay,
         per_alpha=per_alpha,
-        per_beta_0=per_beta_0
+        per_beta_0=per_beta_0,
+        dueling_dqn=dueling_dqn
     )
 
     scores, per_betas = train_agent(
