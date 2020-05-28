@@ -75,10 +75,10 @@ class PrioritizedReplayBuffer:
             batch_size: int,
             seed: Optional[int],
             device: torch.device,
-            alpha: float = 0.6,
+            alpha: float = 0.2,
             beta_0: float = 0.4,
             beta_number_annealing_steps=2000*75,
-            epsilon=1e-6):
+            epsilon=1e-5):
         """Initialize a ReplayBuffer object.
 
             Args:

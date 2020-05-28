@@ -79,6 +79,8 @@ class DqnAgent(Agent):
             hidden_layers: Optional[List[int]] = None,
             double_dqn: bool = True,
             prioritize_replay: bool = True,
+            per_alpha: Optional[float] = None,
+            per_beta_0: Optional[float] = None,
             seed: Optional[int] = None):
         super().__init__(state_size, action_size)
         self.seed = random.seed(seed)
@@ -86,12 +88,12 @@ class DqnAgent(Agent):
         self.prioritize_replay = prioritize_replay
 
         self.local_dqn = FullyConnectedNetwork(
-            state_size=state_size,
-            action_size=action_size,
+            input_size=state_size,
+            output_size=action_size,
             hidden_layer_widths=hidden_layers).to(device)
         self.target_dqn = FullyConnectedNetwork(
-            state_size=state_size,
-            action_size=action_size,
+            input_size=state_size,
+            output_size=action_size,
             hidden_layer_widths=hidden_layers).to(device)
 
         print(self.local_dqn)
@@ -102,7 +104,9 @@ class DqnAgent(Agent):
             buffer_size=buffer_size,
             batch_size=batch_size,
             seed=seed,
-            device=device)
+            device=device,
+            alpha=per_alpha,
+            beta_0=per_beta_0)
         self.global_step = 0
         self.update_every_global_step = update_every_global_step
         self.batch_size = batch_size
@@ -166,7 +170,7 @@ class DqnAgent(Agent):
         if self.prioritize_replay:
             weights, experiences_idx = experiences[5:7]
             td_error = expected_rewards - predicted_rewards
-            loss = (weights * td_error ** 2).mean()
+            loss = (weights * F.mse_loss(expected_rewards, predicted_rewards, reduction='none')).mean()
 
             self.memory.update_priorities(experiences_idx, np.abs(td_error.detach().cpu().numpy()))
 

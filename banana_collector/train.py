@@ -1,6 +1,6 @@
 from collections import deque
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from udacity_custom_unity_agents.unityagents import UnityEnvironment
@@ -19,7 +19,7 @@ def train_agent(
         final_epsilon: float = 0.01,
         epsilon_decay: float = 0.995,
         solution_threshold: float = 13
-) -> List[float]:
+) -> Tuple[List[float], List[float]]:
     """Train and save an agent using an environment.
 
     Args:
@@ -36,9 +36,12 @@ def train_agent(
             environment is considered solved
 
     Returns:
-        a list of the rolling 100 episode score averages
+        scores: a list of the rolling 100 episode score averages
+        per_betas: a list of the annealed betas from the prioritized experience replay. If not activated,
+            will return an empty list. The purpose of this output is mostly debugging.
     """
     scores = []
+    per_betas = []
     solved = False
     scores_window = deque(maxlen=100)
     epsilon = initial_epsilon
@@ -72,5 +75,8 @@ def train_agent(
             print(f'\nEnvironment solved in {i_episode - 100:d} episodes!\tAverage Score: {np.mean(scores_window):.2f}')
             solved = True
 
+        if agent.prioritize_replay is not None:
+            per_betas.append(agent.memory._annealed_beta())
+
     agent.save(agent_save_path)
-    return scores
+    return scores, per_betas

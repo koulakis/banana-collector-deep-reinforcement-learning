@@ -6,21 +6,21 @@ import torch.nn.functional as F
 
 class FullyConnectedNetwork(nn.Module):
     """A feed forward, fully connected network."""
-    def __init__(self, state_size: int, action_size: int, hidden_layer_widths: Optional[List[int]] = None):
+    def __init__(self, input_size: int, output_size: int, hidden_layer_widths: Optional[List[int]] = None):
         """The network is initialized with a list of hidden layer sizes."""
         super().__init__()
         if hidden_layer_widths is None:
             hidden_layer_widths = [64, 64, 64]
 
-        input_layer_output_size = hidden_layer_widths[0] if any(hidden_layer_widths) else action_size
-        output_layer_input_size = hidden_layer_widths[-1] if any(hidden_layer_widths) else state_size
+        input_layer_output_size = hidden_layer_widths[0] if any(hidden_layer_widths) else output_size
+        output_layer_input_size = hidden_layer_widths[-1] if any(hidden_layer_widths) else input_size
 
-        self.input_layer = nn.Linear(state_size, input_layer_output_size)
+        self.input_layer = nn.Linear(input_size, input_layer_output_size)
         self.fc_layers = nn.ModuleList([
             nn.Linear(width0, width1)
             for width0, width1
             in zip(hidden_layer_widths[:-1], hidden_layer_widths[1:])])
-        self.output_layer = nn.Linear(output_layer_input_size, action_size)
+        self.output_layer = nn.Linear(output_layer_input_size, output_size)
 
     def forward(self, state):
         """Map an environment state to an action."""
@@ -29,3 +29,31 @@ class FullyConnectedNetwork(nn.Module):
             net = F.relu(fc(net))
 
         return self.output_layer(net)
+
+
+class DuelingNetwork(nn.Module):
+    """A dueling network architecture which splits the computation of the Q-function
+    to the computation of the value and advantage."""
+    def __init__(
+            self,
+            input_size: int,
+            output_size: int,
+            backbone_hidden_layer_widths: Optional[List[int]] = None,
+            latent_size=64):
+        super().__init__()
+        if backbone_hidden_layer_widths is None:
+            backbone_hidden_layer_widths = [64, 64]
+        self.backbone = FullyConnectedNetwork(input_size, latent_size, backbone_hidden_layer_widths)
+        self.value = FullyConnectedNetwork(latent_size, 1, [latent_size // 2])
+        self.advantage = FullyConnectedNetwork(latent_size, output_size, [latent_size // 2])
+
+    def forward(self, state):
+        latent = self.backbone(state)
+        value = self.value(state)
+        advantage = self.advantage(latent)
+
+        print('Shape of advantage: ', advantage.shape)
+
+        zero_advantage = advantage - advantage.max(dim=(1, 2), keepdim=True)
+
+        return value + zero_advantage

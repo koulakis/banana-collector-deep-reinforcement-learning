@@ -26,7 +26,9 @@ def train(
     epsilon_decay: float = 0.995,
     hidden_layers: Optional[str] = None,
     double_dqn: bool = True,
-    prioritize_replay: bool = True
+    prioritize_replay: bool = False,
+    per_alpha: Optional[float] = None,
+    per_beta_0: Optional[float] = None
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)
@@ -35,6 +37,7 @@ def train(
     agent_path = experiment_dir / 'checkpoint.pth'
     performance_path = experiment_dir / 'performance.png'
     score_path = experiment_dir / 'scores.csv'
+    per_betas_path = experiment_dir / 'per_betas.csv'
 
     env = UnityEnvironment(file_name=environment_path, no_graphics=True)
     brain_name = env.brain_names[0]
@@ -52,9 +55,12 @@ def train(
         device=device,
         hidden_layers=hidden_layers,
         double_dqn=double_dqn,
-        prioritize_replay=prioritize_replay)
+        prioritize_replay=prioritize_replay,
+        per_alpha=per_alpha,
+        per_beta_0=per_beta_0
+    )
 
-    scores = train_agent(
+    scores, per_betas = train_agent(
         agent,
         env,
         brain_name,
@@ -75,6 +81,8 @@ def train(
     plt.ylabel('Score')
     plt.xlabel('Episode #')
     plt.savefig(performance_path)
+
+    pd.DataFrame({'per_betas': per_betas}).to_csv(per_betas_path, index=False)
 
 
 if __name__ == '__main__':
