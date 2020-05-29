@@ -11,13 +11,12 @@ from banana_collector.agent import DqnAgent
 from banana_collector.train import train_agent
 
 ENVIRONMENT_EXECUTABLE_PATH = str(ROOT_DIR / 'unity_banana_environment/Banana.x86_64')
-DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 EXPERIMENTS_DIR = ROOT_DIR / 'experiments'
 
 
 def train(
-    experiment_name: str = 'dqn',
-    device: str = DEVICE,
+    experiment_name: str = typer.Option(...),
+    device: str = 'cpu',
     environment_path: str = ENVIRONMENT_EXECUTABLE_PATH,
     number_of_episodes: int = 2000,
     maximum_timestaps: int = 1000,

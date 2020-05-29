@@ -1,2 +1,19 @@
-python scripts/train_agent.py --device cpu --experiment-name dueling_dqn_sched_lr_1e-3_200 --learning-rate 0.001
-python scripts/train_agent.py --device cpu --experiment-name dueling_dqn_sched_lr_5e-4_200 --learning-rate 0.0005
+#python scripts/train_agent.py \
+#  --experiment-name final_comparison_dqn \
+#  --no-dueling-dqn --no-double-dqn --no-prioritize-replay \
+#  --number-of-episodes 4000
+#
+#python scripts/train_agent.py \
+#  --experiment-name final_comparison_dueling_dqn \
+#  --dueling-dqn --no-double-dqn --no-prioritize-replay \
+#  --number-of-episodes 4000
+
+python scripts/train_agent.py \
+  --experiment-name final_comparison_dueling_double_dqn \
+  --dueling-dqn --double-dqn --no-prioritize-replay \
+  --number-of-episodes 4000
+
+python scripts/train_agent.py \
+  --experiment-name final_comparison_dueling_double_per_dqn \
+  --dueling-dqn --double-dqn --prioritize-replay \
+  --number-of-episodes 4000
