@@ -54,6 +54,9 @@ The project comes along with some pre-trained agents, scripts to test them and t
 can access the saved agent models inside the sub-folders of `experiments`. An example usage:
     ```python scripts/test_agent_in_environment.py --agent-parameters-path experiments/dqn_training/checkpoint.pth```
     
+- `evaluate_agent`: This script is used to evaluate the agent on a number of episodes. The agent is not trained further
+during the evaluation and the exploration rate is set to 0.
+    
 ### Pre-trained models
 Under the `experiments` directory there are several pre-trained agents one can used to run in the environment. All of
 them have solved the environment so they are expected to have a relative intelligent behaviour.
@@ -66,6 +69,7 @@ Udacity and several mainstream publications. Below you can find some links which
 1. Most of the simulation setup comes from (this notebook)[https://github.com/udacity/deep-reinforcement-learning/blob/master/p1_navigation/Navigation.ipynb]
 1. The architecture of the agent and the training loop was influenced by a (similar project in the course)[https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn/solution]
 1. The unity environment created by Udacity is a direct copy (from here)[https://github.com/udacity/deep-reinforcement-learning/tree/master/python]
+1. Some implementation details (e.g. for the dueling DQN architecture) were inspired from the (ReAgent project)[https://github.com/facebookresearch/ReAgent]
  
 ### Publications
 The following publications were either directly used to build improvements of the original DQN algorithm or provided
