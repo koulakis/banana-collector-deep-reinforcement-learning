@@ -69,7 +69,7 @@ class DqnAgent(Agent):
             self,
             state_size: int,
             action_size: int,
-            learning_rate: float = 1e-4,
+            learning_rate: float = 1e-5,
             device: torch.device = DEFAULT_DEVICE,
             buffer_size: int = int(1e5),
             batch_size: int = 64,
@@ -100,6 +100,14 @@ class DqnAgent(Agent):
         print(self.local_dqn)
 
         self.optimizer = optim.Adam(self.local_dqn.parameters(), lr=learning_rate)
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            'max',
+            factor=0.5,
+            cooldown=100,
+            patience=100,
+            min_lr=1e-7,
+            verbose=True)
         self.memory = (PrioritizedReplayBuffer if self.prioritize_replay else ReplayBuffer)(
             action_size=action_size,
             buffer_size=buffer_size,
@@ -186,6 +194,9 @@ class DqnAgent(Agent):
         self.optimizer.step()
 
         self.soft_update(self.local_dqn, self.target_dqn, self.tau)
+
+    def on_epoch_end(self, average_score):
+        self.scheduler.step(average_score)
 
     @staticmethod
     def soft_update(local_model: nn.Module, target_model: nn.Module, tau: float):

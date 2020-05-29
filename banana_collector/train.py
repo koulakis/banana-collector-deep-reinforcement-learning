@@ -5,11 +5,11 @@ from typing import List, Tuple
 import numpy as np
 from udacity_custom_unity_agents.unityagents import UnityEnvironment
 
-from banana_collector.agent import Agent
+from banana_collector.agent import DqnAgent
 
 
 def train_agent(
-        agent: Agent,
+        agent: DqnAgent,
         env: UnityEnvironment,
         brain_name: str,
         agent_save_path: Path,
@@ -19,7 +19,7 @@ def train_agent(
         final_epsilon: float = 0.01,
         epsilon_decay: float = 0.995,
         solution_threshold: float = 13
-) -> Tuple[List[float], List[float]]:
+) -> Tuple[List[float], List[float], List[float]]:
     """Train and save an agent using an environment.
 
     Args:
@@ -40,8 +40,7 @@ def train_agent(
         per_betas: a list of the annealed betas from the prioritized experience replay. If not activated,
             will return an empty list. The purpose of this output is mostly debugging.
     """
-    scores = []
-    per_betas = []
+    scores, per_betas, lr_values = [], [], []
     solved = False
     scores_window = deque(maxlen=100)
     epsilon = initial_epsilon
@@ -66,17 +65,23 @@ def train_agent(
         scores_window.append(score)
         scores.append(score)
         epsilon = max(final_epsilon, epsilon_decay * epsilon)
-        print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}', end='')
+
+        average_window_score = np.mean(scores_window)
+        agent.on_epoch_end(average_window_score)
+
+        current_lr = agent.optimizer.param_groups[0]['lr']
+        lr_values.append(current_lr)
+        print(f'\rEpisode {i_episode}\tAverage Score: {average_window_score:.2f}\t', end='')
 
         if i_episode % 100 == 0:
-            print(f'\rEpisode {i_episode}\tAverage Score: {np.mean(scores_window):.2f}')
+            print(f'\rEpisode {i_episode}\tAverage Score: {average_window_score:.2f}')
 
-        if np.mean(scores_window) >= solution_threshold and not solved:
-            print(f'\nEnvironment solved in {i_episode - 100:d} episodes!\tAverage Score: {np.mean(scores_window):.2f}')
+        if average_window_score >= solution_threshold and not solved:
+            print(f'\nEnvironment solved in {i_episode - 100:d} episodes!\tAverage Score: {average_window_score:.2f}')
             solved = True
 
         if agent.prioritize_replay:
             per_betas.append(agent.memory._annealed_beta())
 
     agent.save(agent_save_path)
-    return scores, per_betas
+    return scores, per_betas, lr_values

@@ -29,7 +29,8 @@ def train(
     prioritize_replay: bool = False,
     dueling_dqn: bool = True,
     per_alpha: Optional[float] = None,
-    per_beta_0: Optional[float] = None
+    per_beta_0: Optional[float] = None,
+    learning_rate: float = 1e-5
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)
@@ -39,6 +40,7 @@ def train(
     performance_path = experiment_dir / 'performance.png'
     score_path = experiment_dir / 'scores.csv'
     per_betas_path = experiment_dir / 'per_betas.csv'
+    lr_values_path = experiment_dir / 'lr_values.csv'
 
     env = UnityEnvironment(file_name=environment_path, no_graphics=True)
     brain_name = env.brain_names[0]
@@ -59,10 +61,11 @@ def train(
         prioritize_replay=prioritize_replay,
         per_alpha=per_alpha,
         per_beta_0=per_beta_0,
-        dueling_dqn=dueling_dqn
+        dueling_dqn=dueling_dqn,
+        learning_rate=learning_rate
     )
 
-    scores, per_betas = train_agent(
+    scores, per_betas, lr_values = train_agent(
         agent,
         env,
         brain_name,
@@ -85,6 +88,7 @@ def train(
     plt.savefig(performance_path)
 
     pd.DataFrame({'per_betas': per_betas}).to_csv(per_betas_path, index=False)
+    pd.DataFrame({'lr_values': lr_values}).to_csv(lr_values_path, index=False)
 
 
 if __name__ == '__main__':

@@ -53,6 +53,6 @@ class DuelingNetwork(nn.Module):
         value = self.value(latent)
         advantage = self.advantage(latent)
 
-        zero_advantage = advantage - advantage.max(dim=1, keepdim=True)[0]
+        zero_advantage = advantage - advantage.mean(dim=1, keepdim=True)[0]
 
         return value + zero_advantage

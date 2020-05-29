@@ -21,6 +21,8 @@ def evaluate(
     maximum_timestaps: int = 1000,
     environment_path: str = DEFAULT_ENVIRONMENT_EXECUTABLE_PATH
 ):
+    """Evaluate an agent on some episodes. Note that the agent is not trained during the evaluation and the
+    exploration is set to 0. Thus the results really reflect the final performance of the agent."""
     agent_path = agent_dir / 'checkpoint.pth'
     if not agent_path.exists():
         logging.warning(f'No saved parameters found for agent in {agent_dir}.')
