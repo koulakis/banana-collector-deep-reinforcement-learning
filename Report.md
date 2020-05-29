@@ -22,7 +22,8 @@ was fix throughout all of the experiments described below.
 A second network is defined which implements the dueling DQN architecture. The output of the last 64 width layer of the
 (64, 64, 64) network mentioned above is used as input to 2 dense networks which compute respectively the value of the
 input state and the advantage of the state-action combination. The Q function is then computed as follows:
-$$Q(s, a) = V(s) + (A(s, a) - E_{a'\in\mathcal{A}}[A(s, a')])$$
+
+$Q(s, a) = V(s) + (A(s, a) - E_{a'\in\mathcal{A}}[A(s, a')])$
 
 Both the A and V networks have two layer with sizes (64, 32) and they output respectively $|\mathcal{A}|$ and 1
 values.

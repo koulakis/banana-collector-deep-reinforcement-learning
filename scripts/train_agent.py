@@ -30,7 +30,7 @@ def train(
     dueling_dqn: bool = True,
     per_alpha: Optional[float] = None,
     per_beta_0: Optional[float] = None,
-    learning_rate: float = 1e-5
+    learning_rate: float = 5e-4
 ):
     """Train an agent and save its parameters along with training artifacts."""
     device = torch.device(device)

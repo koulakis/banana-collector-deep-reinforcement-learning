@@ -69,7 +69,7 @@ class DqnAgent(Agent):
             self,
             state_size: int,
             action_size: int,
-            learning_rate: float = 1e-5,
+            learning_rate: float = 5e-4,
             device: torch.device = DEFAULT_DEVICE,
             buffer_size: int = int(1e5),
             batch_size: int = 64,
@@ -105,7 +105,7 @@ class DqnAgent(Agent):
             'max',
             factor=0.5,
             cooldown=100,
-            patience=100,
+            patience=200,
             min_lr=1e-7,
             verbose=True)
         self.memory = (PrioritizedReplayBuffer if self.prioritize_replay else ReplayBuffer)(
