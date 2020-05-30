@@ -3,6 +3,7 @@ from enum import Enum
 import logging
 from typing import Optional
 from pathlib import Path
+import random
 
 from unityagents import UnityEnvironment
 import typer
@@ -23,7 +24,8 @@ class AgentType(str, Enum):
 def run_environment(
         environment_path: str = DEFAULT_ENVIRONMENT_EXECUTABLE_PATH,
         agent_type: AgentType = AgentType.dqn,
-        agent_parameters_path: Optional[Path] = None
+        agent_parameters_path: Optional[Path] = None,
+        dueling_dqn: bool = True
 ):
     """Run the banana environment and visualize the actions an agent.
 
@@ -31,8 +33,10 @@ def run_environment(
         environment_path: path of the executable which runs the banana environment
         agent_type: the type of the agent. Can either be a dummy rangdom agent or an agent using a DQN
         agent_parameters_path: an optional path to load the agent parameters from
+        dueling_dqn: flag which designates whether the loaded agent uses a dueling dqn architecture
     """
-    env = UnityEnvironment(file_name=environment_path)
+    seed = random.randint(0, int(1e6))
+    env = UnityEnvironment(file_name=environment_path, seed=seed)
     brain_name = env.brain_names[0]
     brain = env.brains[brain_name]
 
@@ -44,7 +48,12 @@ def run_environment(
         agent = RandomAgent(state_size, action_size)
         logging.info(f'Loaded {agent} agent.')
     else:
-        agent = DqnAgent(state_size=state_size, action_size=action_size, device=DEVICE)
+        agent = DqnAgent(
+            state_size=state_size,
+            action_size=action_size,
+            device=DEVICE,
+            dueling_dqn=dueling_dqn
+        )
         if agent_parameters_path:
             agent.load(agent_parameters_path)
         logging.info(f'Loaded {agent} agent.')
@@ -60,7 +69,7 @@ def run_environment(
         done = env_info.local_done[0]
         score += reward
         state = next_state
-        sleep(0.02)
+        sleep(0.04)
         if done:
             break
 

@@ -3,6 +3,10 @@
 ## Introduction
 This is a solution for the first project of the [Udacity deep reinforcement learning course](https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893). It includes code for training an agent and for using it in a simulation environment.
 
+## Example agent
+The giff shows the behavior of an agent trained with DQN in this codebase. The agent parameters can be found under `experiments/final_comparison_dqn/checkpoint.pth`.
+![Agent test run](artifacts/screencast_unity_edited.gif)
+
 ## Problem description
 The agent is placed in a room with bananas and its goal is to collect as many fresh (yellow) bananas as possible during a fixed amount of time while avoiding rotten bananas (blue).
 
