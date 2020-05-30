@@ -25,10 +25,10 @@ def train(
     epsilon_decay: float = 0.995,
     hidden_layers: Optional[str] = None,
     double_dqn: bool = True,
-    prioritize_replay: bool = False,
+    prioritize_replay: bool = True,
     dueling_dqn: bool = True,
-    per_alpha: Optional[float] = None,
-    per_beta_0: Optional[float] = None,
+    per_alpha: Optional[float] = 0.1,
+    per_beta_0: Optional[float] = 0.0,
     learning_rate: float = 5e-4
 ):
     """Train an agent and save its parameters along with training artifacts."""
