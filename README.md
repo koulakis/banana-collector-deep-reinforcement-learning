@@ -81,6 +81,6 @@ inspiration for setting hyper parameters and understanding the problem.
 
 1. *Human-level control through deep reinforcement learning*. Mnih, V., Kavukcuoglu, K., Silver, D. et al. . Nature 518, 529–533. 2015.
 1. *Prioritized Experience Replay*. Tom Schaul and John Quan and Ioannis Antonoglou and David Silver. arXiv:1511.05952. 2015.
-1. *Deep Reinforcement Learning with Double Q-Learning*. Ziyu Wang and Tom Schaul and Matteo Hessel and Hado van Hasselt and Marc Lanctot and Nando de Freitas. arXiv:1511.06581. 2015.
+1. *Dueling Network Architectures for Deep Reinforcement Learning*. Ziyu Wang and Tom Schaul and Matteo Hessel and Hado van Hasselt and Marc Lanctot and Nando de Freitas. arXiv:1511.06581. 2015.
 1. *Deep Reinforcement Learning with Double Q-learning*. Hado van Hasselt and Arthur Guez and David Silver. arXiv:1509.06461. 2015.
 1. *Rainbow: Combining Improvements in Deep Reinforcement Learning*. Matteo Hessel and Joseph Modayil and Hado van Hasselt and Tom Schaul and Georg Ostrovski and Will Dabney and Dan Horgan and Bilal Piot and Mohammad Azar and David Silver. arXiv:1710.02298. 2017.
