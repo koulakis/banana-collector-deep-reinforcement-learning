@@ -25,7 +25,7 @@ The agent is placed in a room with bananas and its goal is to collect as many fr
 
 ## Solution
 The problem is solved by training an agent using a deep Q-learning architecture with some improvements including
-double DQL, prioritized experience replay and dueling DQN. For more details look in the (corresponding report)[<tbd>]. 
+double DQL, prioritized experience replay and dueling DQN. For more details look in the [corresponding report](https://github.com/koulakis/banana-collector-deep-reinforcement-learning/blob/master/Report.ipynb).
 
 ## Setup project
 To setup the project follow those steps:
@@ -37,7 +37,7 @@ cd banana-collector-deep-reinforcement-learning
 pip install .
 ```
 - Create a directory called `udacity_custom_unity_agent` under the root of the project and download and extract there
-  the environment compatible with your architecture. You can find the (download links here)[https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation#getting-started].
+  the environment compatible with your architecture. You can find the [download links here](https://github.com/udacity/deep-reinforcement-learning/tree/master/p1_navigation#getting-started).
 - Install a version of pytorch compatible with your architecture. The version used to develop the project was 1.5.0.
 e.g. `pip install pytorch==1.5.0`
 
@@ -70,10 +70,10 @@ Given that this project is an assignment of an online course, it has been influe
 Udacity and several mainstream publications. Below you can find some links which can give some broader context.
 
 ### Codebases
-1. Most of the simulation setup comes from (this notebook)[https://github.com/udacity/deep-reinforcement-learning/blob/master/p1_navigation/Navigation.ipynb]
-1. The architecture of the agent and the training loop was influenced by a (similar project in the course)[https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn/solution]
-1. The unity environment created by Udacity is a direct copy (from here)[https://github.com/udacity/deep-reinforcement-learning/tree/master/python]
-1. Some implementation details (e.g. for the dueling DQN architecture) were inspired from the (ReAgent project)[https://github.com/facebookresearch/ReAgent]
+1. Most of the simulation setup comes from [this notebook](https://github.com/udacity/deep-reinforcement-learning/blob/master/p1_navigation/Navigation.ipynb)
+1. The architecture of the agent and the training loop was influenced by a [similar project in the course](https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn/solution)
+1. The unity environment created by Udacity is a direct copy [from here](https://github.com/udacity/deep-reinforcement-learning/tree/master/python)
+1. Some implementation details (e.g. for the dueling DQN architecture) were inspired from the [ReAgent project](https://github.com/facebookresearch/ReAgent)
  
 ### Publications
 The following publications were either directly used to build improvements of the original DQN algorithm or provided
