@@ -19,7 +19,7 @@ setuptools.setup(
     description="This is a solution for the first project of the Udacity deep reinforcement learning course.",
     packages=['banana_collector', 'scripts'],
     install_requires=[
-        'tensorflow==1.7.1',
+        'tensorflow==2.3.1',
         'mlagents',
         'numpy',
         'typer'
